@@ -2,18 +2,36 @@
   "name": "nocodb-meta-cli",
   "version": "0.1.0",
   "description": "CLI for NocoDB meta API v2/v3 with manifest-based schema apply workflows",
+  "homepage": "https://github.com/Omasumasu/nocodb-meta-cli#readme",
+  "bugs": {
+    "url": "https://github.com/Omasumasu/nocodb-meta-cli/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Omasumasu/nocodb-meta-cli.git"
+  },
   "bin": {
     "noco-meta": "./bin/noco-meta.js"
   },
+  "files": [
+    "bin",
+    "dist",
+    "README.md"
+  ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build",
+    "prepack": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "oxlint . --deny-warnings",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
     "start": "npm run build --silent && node ./bin/noco-meta.js",
-    "test": "tsx --test test/**/*.test.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "knip": "knip",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm run test && npm run knip"
   },
@@ -22,9 +40,9 @@
     "knip": "^6.2.0",
     "oxfmt": "^0.43.0",
     "oxlint": "^1.58.0",
-    "tsx": "^4.21.0",
     "typescript": "^6.0.2",
-    "vite": "^8.0.3"
+    "vite": "^8.0.3",
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">=20"

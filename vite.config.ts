@@ -1,7 +1,7 @@
 import { builtinModules } from "node:module";
 import path from "node:path";
 
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 const external = new Set([
   ...builtinModules,
@@ -26,5 +26,9 @@ export default defineConfig({
         banner: "#!/usr/bin/env node",
       },
     },
+  },
+  test: {
+    environment: "node",
+    include: ["test/**/*.test.ts"],
   },
 });

@@ -23,10 +23,10 @@ npm run build
 ## Tooling
 
 - build: `vite`
+- test: `vitest`
 - lint: `oxlint`
 - format: `oxfmt`
 - typecheck: `tsc --noEmit`
-- tests: `tsx --test`
 - dead code / unused deps: `knip`
 
 まとめて確認:
