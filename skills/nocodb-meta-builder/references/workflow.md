@@ -9,7 +9,14 @@ npm install
 npm run build
 ```
 
-Set connection info:
+Initialize local access:
+
+```bash
+node ./bin/noco-meta.js init
+node ./bin/noco-meta.js doctor
+```
+
+For CI or other non-interactive runs, use env vars instead:
 
 ```bash
 export NOCODB_BASE_URL="https://your-nocodb.example.com"
@@ -96,3 +103,4 @@ node ./bin/noco-meta.js request POST /meta/tables/{tableId}/columns --body @payl
 - `v3` assumes workspace-oriented flows.
 - `v2` can need extra raw overrides for advanced field and view payloads.
 - Existing view sorts and filters are not fully reconciled by `apply` yet. Use `request` when you need exact control.
+- Local interactive use expects an initialized profile. Switch profiles with `node ./bin/noco-meta.js profile use <name>` when needed.

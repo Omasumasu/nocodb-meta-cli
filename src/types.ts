@@ -1,4 +1,6 @@
 export type ApiVersion = "v2" | "v3";
+export type ConfigSource = "env" | "managed" | "none";
+export type SecretStoreKind = "macos-keychain" | "linux-secret-service" | "unsupported";
 
 export type FlagValue = string | boolean | Array<string | boolean>;
 export type FlagMap = Record<string, FlagValue>;
@@ -72,9 +74,47 @@ export interface CliConfig {
   token: string | null;
   workspaceId: string | null;
   baseId: string | null;
+  profileName: string | null;
+  configHome: string | null;
+  projectContextPath: string | null;
+  managed: boolean;
+  configSource: ConfigSource;
+  secretStoreKind: SecretStoreKind | null;
   json: boolean;
   verbose: boolean;
   configPath: string | null;
+}
+
+export interface ProfileRecord {
+  name: string;
+  baseUrl: string;
+  apiVersion: ApiVersion;
+  workspaceId: string | null;
+  baseId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfilesFile {
+  version: 1;
+  defaultProfile: string | null;
+  profiles: Record<string, ProfileRecord>;
+}
+
+export interface ProjectContext {
+  version: 1;
+  profile: string | null;
+  workspaceId: string | null;
+  baseId: string | null;
+  updatedAt: string;
+}
+
+export interface SecretStore {
+  kind: SecretStoreKind;
+  isAvailable(): Promise<{ ok: boolean; reason?: string }>;
+  getToken(profileName: string): Promise<string | null>;
+  setToken(profileName: string, token: string): Promise<void>;
+  deleteToken(profileName: string): Promise<void>;
 }
 
 export interface NormalizedField {

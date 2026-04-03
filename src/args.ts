@@ -8,6 +8,7 @@ const GLOBAL_FLAGS = new Set([
   "config",
   "help",
   "json",
+  "profile",
   "token",
   "verbose",
   "workspace-id",

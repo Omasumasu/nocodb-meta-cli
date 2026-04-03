@@ -1,4 +1,11 @@
 import { parseArgv, parseFlags } from "./args.js";
+import {
+  runAuthCommand,
+  runContextCommand,
+  runDoctor,
+  runInit,
+  runProfileCommand,
+} from "./admin.js";
 import { runApply, formatApplySummary } from "./apply.js";
 import { loadResolvedConfig, requireConnectionConfig } from "./config.js";
 import { CliError } from "./errors.js";
@@ -10,13 +17,17 @@ import {
   validateManifest,
 } from "./manifest.js";
 import { createNocoClient } from "./nocodb-client.js";
-import type { CliConfig } from "./types.js";
 import { keyValueListToObject, printOutput, readJsonInput } from "./utils.js";
 
 function renderHelp(): string {
   return `noco-meta
 
 Usage:
+  noco-meta init
+  noco-meta profile <ls|show|add|use|rm|default>
+  noco-meta auth <set|rm|status>
+  noco-meta context <show|set|clear>
+  noco-meta doctor
   noco-meta request <METHOD> <PATH> [--body @file.json] [--query key=value] [--header key=value]
   noco-meta apply <manifest.json>
   noco-meta plan <manifest.json>
@@ -24,12 +35,18 @@ Usage:
   noco-meta template manifest
 
 Global options:
+  --profile <name>        profile override
   --base-url <url>       NocoDB base URL
   --token <token>        xc-token
   --api-version <v2|v3>  default: v3
   --workspace-id <id>    default workspace override
   --base-id <id>         default base override
   --json                 print machine-readable output where relevant
+
+Connection notes:
+  - local interactive use requires "noco-meta init"
+  - CI or other non-interactive runs can use NOCODB_BASE_URL and NOCODB_TOKEN
+  - flags override resolved config but do not replace init for local use
 
 Manifest notes:
   - JSON only for now
@@ -69,7 +86,10 @@ async function runRequest(
   printOutput(response ?? {});
 }
 
-async function runValidate(args: string[], globalConfig: CliConfig): Promise<void> {
+async function runValidate(
+  args: string[],
+  globalConfig: Awaited<ReturnType<typeof loadResolvedConfig>>,
+): Promise<void> {
   const { positionals } = parseFlags(args);
   const manifest = loadManifest(validatePathArg(positionals, "validate"));
   validateManifest(manifest);
@@ -102,7 +122,7 @@ async function runTemplate(args: string[]): Promise<void> {
 async function runApplyLike(
   command: "apply" | "plan",
   args: string[],
-  globalConfig: CliConfig,
+  globalConfig: Awaited<ReturnType<typeof loadResolvedConfig>>,
 ): Promise<void> {
   requireConnectionConfig(globalConfig);
 
@@ -114,6 +134,7 @@ async function runApplyLike(
   const summary = await runApply(client, normalizeManifest(manifest as any), {
     dryRun: command === "plan" || flags["dry-run"] === true,
     workspaceId: globalConfig.workspaceId,
+    baseId: globalConfig.baseId,
   });
 
   if (globalConfig.json) {
@@ -126,7 +147,6 @@ async function runApplyLike(
 
 export async function runCli(argv: string[]): Promise<void> {
   const parsed = parseArgv(argv);
-  const globalConfig = loadResolvedConfig(parsed.globals);
 
   if (parsed.command === "help" || parsed.globals.help === true) {
     printOutput(renderHelp());
@@ -134,7 +154,28 @@ export async function runCli(argv: string[]): Promise<void> {
   }
 
   switch (parsed.command) {
+    case "init":
+      await runInit(parsed.globals, parsed.commandArgs);
+      return;
+
+    case "profile":
+      await runProfileCommand(parsed.globals, parsed.commandArgs);
+      return;
+
+    case "auth":
+      await runAuthCommand(parsed.globals, parsed.commandArgs);
+      return;
+
+    case "context":
+      await runContextCommand(parsed.globals, parsed.commandArgs);
+      return;
+
+    case "doctor":
+      await runDoctor(parsed.globals);
+      return;
+
     case "request": {
+      const globalConfig = await loadResolvedConfig(parsed.globals);
       requireConnectionConfig(globalConfig);
       const client = createNocoClient(globalConfig);
       await runRequest(client, parsed.commandArgs);
@@ -142,13 +183,17 @@ export async function runCli(argv: string[]): Promise<void> {
     }
 
     case "apply":
-    case "plan":
+    case "plan": {
+      const globalConfig = await loadResolvedConfig(parsed.globals);
       await runApplyLike(parsed.command, parsed.commandArgs, globalConfig);
       return;
+    }
 
-    case "validate":
+    case "validate": {
+      const globalConfig = await loadResolvedConfig(parsed.globals);
       await runValidate(parsed.commandArgs, globalConfig);
       return;
+    }
 
     case "template":
       await runTemplate(parsed.commandArgs);

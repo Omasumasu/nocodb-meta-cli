@@ -229,10 +229,11 @@ async function resolveBase(
   client: ReturnType<typeof import("./nocodb-client.js").createNocoClient>,
   manifest: Manifest,
   workspace: NormalizedWorkspace | null,
+  options: { baseId?: string | null },
   summary: ApplySummary,
 ) {
   const baseSpec = manifest.base!;
-  const explicitBaseId = baseSpec.id;
+  const explicitBaseId = baseSpec.id || options.baseId;
 
   if (explicitBaseId) {
     recordEntry(summary, {
@@ -528,13 +529,13 @@ async function ensureViews(
 export async function runApply(
   client: ReturnType<typeof import("./nocodb-client.js").createNocoClient>,
   manifest: Manifest,
-  options: { dryRun?: boolean; workspaceId?: string | null } = {},
+  options: { dryRun?: boolean; workspaceId?: string | null; baseId?: string | null } = {},
 ): Promise<ApplySummary> {
   validateManifest(manifest);
 
   const summary = createSummary(options.dryRun ? "plan" : "apply", client.apiVersion);
   const workspace = await resolveWorkspace(client, manifest, options, summary);
-  const base = await resolveBase(client, manifest, workspace, summary);
+  const base = await resolveBase(client, manifest, workspace, options, summary);
   const { tableStates, tableStatesByTitle } = await createOrReuseTables(
     client,
     manifest,

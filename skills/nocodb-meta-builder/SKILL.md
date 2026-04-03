@@ -9,23 +9,29 @@ Use this skill when the goal is to create or evolve NocoDB schema from code. Pre
 
 ## Workflow
 
-1. Build the CLI if `dist/src/cli.js` is missing.
+1. Build the CLI if `dist/noco-meta.js` is missing.
    `npm run build`
-2. Read [references/workflow.md](references/workflow.md) if you need manifest conventions or version caveats.
-3. Start from a scaffold when no manifest exists.
+2. Initialize local access before using `plan`, `apply`, or `request`.
+   `node ./bin/noco-meta.js init`
+3. Run `doctor` if the active profile, secure token storage, or connectivity is unclear.
+   `node ./bin/noco-meta.js doctor`
+4. Read [references/workflow.md](references/workflow.md) if you need manifest conventions or version caveats.
+5. Start from a scaffold when no manifest exists.
    `node ./bin/noco-meta.js template manifest`
-4. Write or update a JSON manifest in the workspace.
-5. Validate and dry-run first.
+6. Write or update a JSON manifest in the workspace.
+7. Validate and dry-run first.
    `node ./bin/noco-meta.js validate <manifest.json>`
    `node ./bin/noco-meta.js plan <manifest.json> --api-version v2|v3`
-6. Apply only after the plan looks correct.
+8. Apply only after the plan looks correct.
    `node ./bin/noco-meta.js apply <manifest.json> --api-version v2|v3`
-7. Use `request` for unsupported or low-level operations.
+9. Use `request` for unsupported or low-level operations.
    `node ./bin/noco-meta.js request METHOD PATH [--body @payload.json]`
 
 ## Rules
 
-- Prefer env vars or `.nocodb-meta-cli.json` for auth and defaults.
+- Prefer `init` + managed profiles for local work.
+- Prefer `NOCODB_BASE_URL` and `NOCODB_TOKEN` only for CI or other non-interactive runs.
+- Treat legacy `.nocodb-meta-cli.json` as an init helper, not the primary auth path.
 - Prefer manifest-driven creation for `workspace`, `base`, `table`, `field`, and `view`.
 - Declare each relationship once in the manifest. Do not model both directions unless you intentionally want two separate fields.
 - Use `api.common`, `api.v2`, or `api.v3` overrides when the generated payload is not enough.

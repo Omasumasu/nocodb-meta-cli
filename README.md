@@ -7,6 +7,11 @@ GUI でベースやテーブルを組み立てるのが大変なときに、JSON
 
 ## できること
 
+- `init`: profile 作成、secure token 保存、project context 初期化
+- `profile`: profile の追加・一覧・切り替え・削除
+- `auth`: token の登録・削除・状態確認
+- `context`: project ごとの profile / workspace / base 上書き管理
+- `doctor`: 設定、secure store、疎通確認
 - `request`: `meta` API への低レベルな直接呼び出し
 - `template manifest`: manifest 雛形の生成
 - `validate`: manifest の静的検証
@@ -37,7 +42,30 @@ npm run check
 
 ## 認証設定
 
-環境変数:
+ローカル利用では、まず `init` を実行します。
+
+```bash
+node ./bin/noco-meta.js init
+```
+
+`init` は次を行います。
+
+- profile 名の作成
+- `baseUrl` と `apiVersion` の保存
+- `xc-token` の secure storage 保存
+- 既定 `workspaceId` / `baseId` の保存
+- 現在の project に対する active profile 設定
+
+現在の実装では token は OS の secure store に保存します。
+
+- macOS: Keychain
+- Linux: `secret-tool` が使える場合は Secret Service
+- それ以外の環境では local secure store 未対応
+
+project 固有の context は `.noco-meta/context.json` に保存されます。  
+このディレクトリは `.gitignore` に入っています。
+
+CI や非対話実行では env で bypass できます。
 
 ```bash
 export NOCODB_BASE_URL="https://your-nocodb.example.com"
@@ -45,18 +73,37 @@ export NOCODB_TOKEN="your-xc-token"
 export NOCODB_API_VERSION="v3"
 ```
 
-またはルートに `.nocodb-meta-cli.json` を置けます。
+必要に応じて:
 
-```json
-{
-  "baseUrl": "https://your-nocodb.example.com",
-  "token": "your-xc-token",
-  "apiVersion": "v3",
-  "workspaceId": "ws_xxx"
-}
+```bash
+export NOCODB_WORKSPACE_ID="ws_xxx"
+export NOCODB_BASE_ID="base_xxx"
 ```
 
+補足:
+
+- `--base-url` / `--token` だけでは通常利用できません
+- local 利用は `init` 済み profile 前提です
+- env は CI / automation 用の bypass と考えてください
+- 旧 `.nocodb-meta-cli.json` は `init` の初期値補助としてだけ見ています
+
 ## 使い方
+
+初期化:
+
+```bash
+node ./bin/noco-meta.js init
+node ./bin/noco-meta.js doctor
+```
+
+profile 一覧と切り替え:
+
+```bash
+node ./bin/noco-meta.js profile ls
+node ./bin/noco-meta.js profile use dev
+node ./bin/noco-meta.js auth status dev
+node ./bin/noco-meta.js context show
+```
 
 manifest 雛形を出す:
 
@@ -85,7 +132,7 @@ node ./bin/noco-meta.js apply ./examples/crm.json --api-version v3
 低レベル request:
 
 ```bash
-node ./bin/noco-meta.js request GET /meta/workspaces --api-version v3
+node ./bin/noco-meta.js request GET /meta/workspaces
 node ./bin/noco-meta.js request POST /meta/bases/{baseId}/tables --body @payload.json --api-version v2
 ```
 
