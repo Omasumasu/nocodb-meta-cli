@@ -24,7 +24,7 @@ export NOCODB_TOKEN="your-xc-token"
 export NOCODB_API_VERSION="v3"
 ```
 
-## Preferred Flow
+## Apply Flow (manifest → NocoDB)
 
 1. Generate a starting point.
 
@@ -46,6 +46,39 @@ node ./bin/noco-meta.js plan ./path/to/manifest.json --api-version v3
 ```bash
 node ./bin/noco-meta.js apply ./path/to/manifest.json --api-version v3
 ```
+
+## Export Flow (NocoDB → manifest)
+
+1. Export the current base schema to stdout or a file.
+
+```bash
+# stdout (pipe or redirect as needed)
+node ./bin/noco-meta.js export
+
+# to a file
+node ./bin/noco-meta.js export --output schema.json
+```
+
+2. Validate the exported manifest.
+
+```bash
+node ./bin/noco-meta.js validate schema.json
+```
+
+3. Optional flags:
+
+```bash
+# Export specific tables only
+node ./bin/noco-meta.js export --table "案内文,委任状"
+
+# Include system fields (excluded by default)
+node ./bin/noco-meta.js export --include-system
+
+# Compact JSON (no pretty-print)
+node ./bin/noco-meta.js export --compact
+```
+
+4. The exported manifest can be committed to version control, diffed, or applied to another base.
 
 ## Manifest Tips
 
@@ -83,6 +116,8 @@ node ./bin/noco-meta.js apply ./path/to/manifest.json --api-version v3
 }
 ```
 
+- Exported manifests include `ForeignKey` fields and `ID` fields that NocoDB manages internally. These are safe to keep for documentation but are not needed when applying to a new base.
+
 ## When To Use `request`
 
 Use `request` instead of `apply` when:
@@ -102,5 +137,7 @@ node ./bin/noco-meta.js request POST /meta/tables/{tableId}/columns --body @payl
 
 - `v3` assumes workspace-oriented flows.
 - `v2` can need extra raw overrides for advanced field and view payloads.
+- v2 may require `--workspace-id` even for base listing — some NocoDB versions return 403 on `/meta/bases/` without it.
 - Existing view sorts and filters are not fully reconciled by `apply` yet. Use `request` when you need exact control.
 - Local interactive use expects an initialized profile. Switch profiles with `node ./bin/noco-meta.js profile use <name>` when needed.
+- Use `--verbose` to see request/response details when debugging API issues.

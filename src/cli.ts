@@ -30,7 +30,7 @@ Usage:
   noco-meta context <show|set|clear>
   noco-meta doctor
   noco-meta request <METHOD> <PATH> [--body @file.json] [--query key=value] [--header key=value]
-  noco-meta export [-o file.json] [--compact] [--table "T1,T2"] [--include-system]
+  noco-meta export [--output file.json] [--compact] [--table "T1,T2"] [--include-system]
   noco-meta apply <manifest.json>
   noco-meta plan <manifest.json>
   noco-meta validate <manifest.json>
@@ -96,7 +96,7 @@ async function runExportCommand(
 
   const json = flags.compact ? JSON.stringify(manifest) : JSON.stringify(manifest, null, 2);
 
-  const outputPath = flags.o ?? flags.output;
+  const outputPath = flags.output;
 
   if (outputPath) {
     const fs = await import("node:fs");
