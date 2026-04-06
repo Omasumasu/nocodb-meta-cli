@@ -177,3 +177,39 @@ export interface ApplySummary {
   warnings: string[];
   resourceCounts?: ResourceCounts;
 }
+
+export type DiffAction = "add" | "modify" | "delete" | "type_change";
+
+export interface DiffChange {
+  from: unknown;
+  to: unknown;
+}
+
+export interface DiffEntry {
+  kind: "table" | "field";
+  action: DiffAction;
+  title: string;
+  tableTitle?: string;
+  type?: string;
+  blocked: boolean;
+  reason?: string;
+  changes?: Record<string, DiffChange>;
+  fields?: DiffEntry[];
+}
+
+export interface DiffPlan {
+  entries: DiffEntry[];
+  summary: {
+    tables: { add: number; delete: number };
+    fields: { add: number; modify: number; delete: number; blocked: number };
+  };
+}
+
+export interface DiffOptions {
+  baseId: string;
+  workspaceId: string | null;
+  execute: boolean;
+  allowDropTable: boolean;
+  forceTypeChange: boolean;
+  json: boolean;
+}
