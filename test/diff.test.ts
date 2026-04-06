@@ -416,7 +416,7 @@ describe("formatDiffPlan", () => {
 
     const output = formatDiffPlan(plan, "MyBase");
 
-    expect(output).toContain("- Table: OldTable");
+    expect(output).toContain("! Table: OldTable");
     expect(output).toContain("requires --allow-drop-table");
     expect(output).toContain("Plan: 1 table to delete.");
   });

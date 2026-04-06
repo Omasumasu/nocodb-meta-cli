@@ -345,7 +345,7 @@ export function formatDiffPlan(plan: DiffPlan, baseTitle: string): string {
       lines.push("");
     } else if (entry.kind === "table" && entry.action === "delete") {
       lines.push(
-        `  - Table: ${entry.title}  (will be deleted -- ${entry.reason ?? "requires --allow-drop-table"})`,
+        `  ! Table: ${entry.title}  (will be deleted -- ${entry.reason ?? "requires --allow-drop-table"})`,
       );
       lines.push("");
     } else if (entry.kind === "table" && (entry.action === "modify" || entry.fields)) {
