@@ -418,7 +418,7 @@ function formatFieldEntry(fe: DiffEntry, lines: string[]): void {
 // Plan execution (Task 6)
 // ---------------------------------------------------------------------------
 
-export type NocoClient = {
+type NocoClient = {
   apiVersion: "v2" | "v3";
   listTables(baseId: string): Promise<NormalizedTable[]>;
   getTable(baseId: string, tableId: string): Promise<NormalizedTable>;
@@ -751,7 +751,9 @@ export async function runDiffCommand(
   }
 
   if (flags.execute) {
-    const confirmed = await promptConfirmation("\nDo you want to execute these changes? (yes/no): ");
+    const confirmed = await promptConfirmation(
+      "\nDo you want to execute these changes? (yes/no): ",
+    );
 
     if (!confirmed) {
       printOutput("Cancelled.");
