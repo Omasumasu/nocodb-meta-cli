@@ -227,5 +227,35 @@ export function createNocoClient(config: CliConfig) {
 
       return normalizeView(await request("POST", requestPath, { body: payload }));
     },
+
+    async updateField(
+      baseId: string,
+      tableId: string,
+      fieldId: string,
+      payload: Record<string, unknown>,
+    ): Promise<NormalizedField> {
+      const requestPath =
+        apiVersion === "v2"
+          ? `/meta/tables/${tableId}/columns/${fieldId}`
+          : `/meta/bases/${baseId}/tables/${tableId}/fields/${fieldId}`;
+
+      return normalizeField(await request("PATCH", requestPath, { body: payload }));
+    },
+
+    async deleteField(baseId: string, tableId: string, fieldId: string): Promise<void> {
+      const requestPath =
+        apiVersion === "v2"
+          ? `/meta/tables/${tableId}/columns/${fieldId}`
+          : `/meta/bases/${baseId}/tables/${tableId}/fields/${fieldId}`;
+
+      await request("DELETE", requestPath);
+    },
+
+    async deleteTable(baseId: string, tableId: string): Promise<void> {
+      const requestPath =
+        apiVersion === "v2" ? `/meta/tables/${tableId}` : `/meta/bases/${baseId}/tables/${tableId}`;
+
+      await request("DELETE", requestPath);
+    },
   };
 }
