@@ -10,7 +10,11 @@ import type {
   NormalizedTable,
   TableSpec,
 } from "./types.js";
-import { normalizeCaseInsensitiveMatch, pluralize } from "./utils.js";
+import { normalizeCaseInsensitiveMatch, pluralize, printOutput } from "./utils.js";
+import { CliError } from "./errors.js";
+import { loadManifest, normalizeManifest } from "./manifest.js";
+import { parseFlags } from "./args.js";
+import readline from "node:readline";
 
 export interface ExecutionResult {
   executed: number;
@@ -414,7 +418,7 @@ function formatFieldEntry(fe: DiffEntry, lines: string[]): void {
 // Plan execution (Task 6)
 // ---------------------------------------------------------------------------
 
-type NocoClient = {
+export type NocoClient = {
   apiVersion: "v2" | "v3";
   listTables(baseId: string): Promise<NormalizedTable[]>;
   getTable(baseId: string, tableId: string): Promise<NormalizedTable>;
@@ -679,4 +683,100 @@ export async function executePlan(
   }
 
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// CLI orchestration (Task 7)
+// ---------------------------------------------------------------------------
+
+async function fetchLiveState(client: NocoClient, baseId: string): Promise<NormalizedTable[]> {
+  const tableSummaries = await client.listTables(baseId);
+  const hydrated: NormalizedTable[] = [];
+
+  for (const summary of tableSummaries) {
+    if (summary.id) {
+      hydrated.push(await client.getTable(baseId, summary.id));
+    }
+  }
+
+  return hydrated;
+}
+
+async function promptConfirmation(message: string): Promise<boolean> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+  return new Promise((resolve) => {
+    rl.question(message, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === "yes");
+    });
+  });
+}
+
+export async function runDiffCommand(
+  globalConfig: { baseId: string | null; workspaceId: string | null; json: boolean },
+  client: NocoClient,
+  args: string[],
+): Promise<void> {
+  const { flags, positionals } = parseFlags(args, {
+    booleanFlags: ["execute", "allow-drop-table", "force-type-change"],
+  });
+
+  const manifestPath = (flags.manifest as string | undefined) ?? positionals[0];
+
+  if (!manifestPath) {
+    throw new CliError("diff requires a manifest path.");
+  }
+
+  if (!globalConfig.baseId) {
+    throw new CliError(
+      "diff requires --base-id or a configured base context (via init / context set).",
+    );
+  }
+
+  const manifest = normalizeManifest(loadManifest(manifestPath) as any);
+  const liveTables = await fetchLiveState(client, globalConfig.baseId);
+  const plan = buildDiffPlan(manifest.tables, liveTables);
+  const baseTitle = manifest.base?.title ?? globalConfig.baseId;
+
+  if (globalConfig.json) {
+    printOutput({ plan: plan.entries, summary: plan.summary });
+    return;
+  }
+
+  printOutput(formatDiffPlan(plan, baseTitle));
+
+  if (plan.entries.length === 0) {
+    return;
+  }
+
+  if (flags.execute) {
+    const confirmed = await promptConfirmation("\nDo you want to execute these changes? (yes/no): ");
+
+    if (!confirmed) {
+      printOutput("Cancelled.");
+      return;
+    }
+
+    const options: DiffOptions = {
+      baseId: globalConfig.baseId,
+      workspaceId: globalConfig.workspaceId,
+      execute: true,
+      allowDropTable: flags["allow-drop-table"] === true,
+      forceTypeChange: flags["force-type-change"] === true,
+      json: globalConfig.json,
+    };
+
+    const result = await executePlan(client, plan, options);
+
+    printOutput(
+      `Executed: ${result.executed}, Skipped: ${result.skipped}, Errors: ${result.errors.length}`,
+    );
+
+    if (result.errors.length > 0) {
+      for (const err of result.errors) {
+        printOutput(`  Error: ${err}`);
+      }
+    }
+  }
 }

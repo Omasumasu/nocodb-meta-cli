@@ -8,6 +8,7 @@ import {
 } from "./admin.js";
 import { runApply, formatApplySummary } from "./apply.js";
 import { loadResolvedConfig, requireConnectionConfig } from "./config.js";
+import { runDiffCommand } from "./diff.js";
 import { runExport } from "./export.js";
 import { CliError } from "./errors.js";
 import {
@@ -33,6 +34,7 @@ Usage:
   noco-meta export [--output file.json] [--compact] [--table "T1,T2"] [--include-system]
   noco-meta apply <manifest.json>
   noco-meta plan <manifest.json>
+  noco-meta diff <manifest.json> [--execute] [--allow-drop-table] [--force-type-change]
   noco-meta validate <manifest.json>
   noco-meta template manifest
 
@@ -249,6 +251,14 @@ export async function runCli(argv: string[]): Promise<void> {
     case "template":
       await runTemplate(parsed.commandArgs);
       return;
+
+    case "diff": {
+      const globalConfig = await loadResolvedConfig(parsed.globals);
+      requireConnectionConfig(globalConfig);
+      const client = createNocoClient(globalConfig);
+      await runDiffCommand(globalConfig, client, parsed.commandArgs);
+      return;
+    }
 
     default:
       throw new CliError(`Unknown command "${parsed.command}".\n\n${renderHelp()}`);
