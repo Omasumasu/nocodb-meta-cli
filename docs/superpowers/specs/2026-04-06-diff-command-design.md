@@ -16,13 +16,13 @@ noco-meta diff --manifest <path> --json                   # machine-readable out
 
 ### Flags
 
-| Flag | Type | Default | Description |
-|------|------|---------|-------------|
-| `--manifest` | string | required | Path to manifest JSON file |
-| `--execute` | boolean | false | Execute the plan after confirmation |
-| `--allow-drop-table` | boolean | false | Allow table deletion (otherwise plan-only warning) |
-| `--force-type-change` | boolean | false | Allow field type changes (otherwise plan-only warning) |
-| `--json` | boolean | false | Machine-readable JSON output |
+| Flag                  | Type    | Default  | Description                                            |
+| --------------------- | ------- | -------- | ------------------------------------------------------ |
+| `--manifest`          | string  | required | Path to manifest JSON file                             |
+| `--execute`           | boolean | false    | Execute the plan after confirmation                    |
+| `--allow-drop-table`  | boolean | false    | Allow table deletion (otherwise plan-only warning)     |
+| `--force-type-change` | boolean | false    | Allow field type changes (otherwise plan-only warning) |
+| `--json`              | boolean | false    | Machine-readable JSON output                           |
 
 Global flags (`--base-url`, `--token`, `--api-version`, `--profile`, etc.) are inherited from the existing CLI framework.
 
@@ -30,10 +30,10 @@ Global flags (`--base-url`, `--token`, `--api-version`, `--profile`, etc.) are i
 
 ### In scope
 
-| Resource | Add | Modify | Delete |
-|----------|-----|--------|--------|
-| Table | yes | n/a (fields are compared individually) | `--allow-drop-table` required |
-| Field | yes | yes (attributes in manifest) / type change requires `--force-type-change` | yes |
+| Resource | Add | Modify                                                                    | Delete                        |
+| -------- | --- | ------------------------------------------------------------------------- | ----------------------------- |
+| Table    | yes | n/a (fields are compared individually)                                    | `--allow-drop-table` required |
+| Field    | yes | yes (attributes in manifest) / type change requires `--force-type-change` | yes                           |
 
 ### Out of scope
 
@@ -56,12 +56,12 @@ For example, if a manifest field declares only `{ title: "name", type: "SingleLi
 
 ### Diff categories
 
-| Symbol | Color | Meaning | Execution |
-|--------|-------|---------|-----------|
-| `+` | green | Resource to add | Always executed with `--execute` |
-| `~` | yellow | Resource to modify (non-type attributes) | Always executed with `--execute` |
-| `-` | red | Resource to delete | Fields: executed with `--execute`. Tables: requires `--allow-drop-table` |
-| `!` | magenta | Requires manual action or special flag | Skipped unless `--force-type-change` or `--allow-drop-table` |
+| Symbol | Color   | Meaning                                  | Execution                                                                |
+| ------ | ------- | ---------------------------------------- | ------------------------------------------------------------------------ |
+| `+`    | green   | Resource to add                          | Always executed with `--execute`                                         |
+| `~`    | yellow  | Resource to modify (non-type attributes) | Always executed with `--execute`                                         |
+| `-`    | red     | Resource to delete                       | Fields: executed with `--execute`. Tables: requires `--allow-drop-table` |
+| `!`    | magenta | Requires manual action or special flag   | Skipped unless `--force-type-change` or `--allow-drop-table`             |
 
 ## Output format
 
@@ -99,7 +99,13 @@ Do you want to execute these changes? (yes/no):
       "action": "add",
       "title": "orders",
       "fields": [
-        { "kind": "field", "action": "add", "title": "id", "type": "AutoNumber", "tableTitle": "orders" }
+        {
+          "kind": "field",
+          "action": "add",
+          "title": "id",
+          "type": "AutoNumber",
+          "tableTitle": "orders"
+        }
       ]
     },
     {
@@ -213,12 +219,12 @@ interface DiffEntry {
   kind: "table" | "field";
   action: DiffAction;
   title: string;
-  tableTitle?: string;       // for fields
-  type?: string;             // field type
-  blocked: boolean;          // true if requires special flag
-  reason?: string;           // why blocked
-  changes?: Record<string, DiffChange>;  // attribute diffs
-  fields?: DiffEntry[];      // for table adds, nested field entries
+  tableTitle?: string; // for fields
+  type?: string; // field type
+  blocked: boolean; // true if requires special flag
+  reason?: string; // why blocked
+  changes?: Record<string, DiffChange>; // attribute diffs
+  fields?: DiffEntry[]; // for table adds, nested field entries
 }
 
 interface DiffPlan {

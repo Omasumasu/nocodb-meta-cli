@@ -13,6 +13,7 @@
 ### Task 1: Add new client methods to nocodb-client.ts
 
 **Files:**
+
 - Modify: `src/nocodb-client.ts:139-231` (inside `createNocoClient` return object)
 - Test: `test/nocodb-client.test.ts`
 
@@ -171,6 +172,7 @@ git commit -m "feat(client): add updateField, deleteField, deleteTable methods"
 ### Task 2: Add diff types to types.ts
 
 **Files:**
+
 - Modify: `src/types.ts:159-180` (after existing `ApplySummary`)
 
 - [ ] **Step 1: Add DiffAction, DiffChange, DiffEntry, DiffPlan types**
@@ -232,6 +234,7 @@ git commit -m "feat(types): add DiffAction, DiffEntry, DiffPlan, DiffOptions typ
 ### Task 3: Implement diff comparison logic (src/diff.ts — comparison only)
 
 **Files:**
+
 - Create: `src/diff.ts`
 - Test: `test/diff.test.ts`
 
@@ -377,9 +380,7 @@ describe("compareFields", () => {
 
   it("detects type change as blocked", () => {
     const manifestFields = [makeFieldSpec({ title: "Status", type: "SingleSelect" })];
-    const liveFields = [
-      makeNormalizedField({ title: "Status", type: "SingleLineText" }),
-    ];
+    const liveFields = [makeNormalizedField({ title: "Status", type: "SingleLineText" })];
 
     const entries = compareFields(
       manifestFields,
@@ -450,12 +451,7 @@ Create `src/diff.ts`:
 ```typescript
 import { fieldToSpec } from "./export.js";
 import { normalizeCaseInsensitiveMatch } from "./utils.js";
-import type {
-  DiffChange,
-  DiffEntry,
-  FieldSpec,
-  NormalizedField,
-} from "./types.js";
+import type { DiffChange, DiffEntry, FieldSpec, NormalizedField } from "./types.js";
 
 function matchByTitle<T extends { title?: string }>(
   items: T[],
@@ -622,6 +618,7 @@ git commit -m "feat(diff): add field comparison logic with declared-attributes-o
 ### Task 4: Add table-level comparison and DiffPlan generation
 
 **Files:**
+
 - Modify: `src/diff.ts`
 - Modify: `test/diff.test.ts`
 
@@ -763,10 +760,10 @@ describe("buildDiffPlan", () => {
 
     const plan = buildDiffPlan(manifestTables, liveTables);
 
-    expect(plan.summary.tables.add).toBe(1);    // orders
-    expect(plan.summary.tables.delete).toBe(1);  // deprecated
-    expect(plan.summary.fields.add).toBe(1);     // email
-    expect(plan.summary.fields.delete).toBe(1);  // old_col
+    expect(plan.summary.tables.add).toBe(1); // orders
+    expect(plan.summary.tables.delete).toBe(1); // deprecated
+    expect(plan.summary.fields.add).toBe(1); // email
+    expect(plan.summary.fields.delete).toBe(1); // old_col
     expect(plan.summary.fields.blocked).toBe(1); // status type_change
   });
 });
@@ -938,6 +935,7 @@ git commit -m "feat(diff): add table comparison and DiffPlan generation"
 ### Task 5: Implement plan formatting (formatDiffPlan)
 
 **Files:**
+
 - Modify: `src/diff.ts`
 - Modify: `test/diff.test.ts`
 
@@ -1195,10 +1193,10 @@ function formatFieldEntry(entry: DiffEntry): string {
 Note: `pluralize` is used inconsistently in the plan code above — it already returns "N thing(s)" format. Fix the summary line to avoid double-counting: use the raw numbers instead:
 
 ```typescript
-  if (tables.add > 0) {
-    parts.push(`${tables.add} table${tables.add === 1 ? "" : "s"} to add`);
-  }
-  // ... same pattern for all
+if (tables.add > 0) {
+  parts.push(`${tables.add} table${tables.add === 1 ? "" : "s"} to add`);
+}
+// ... same pattern for all
 ```
 
 - [ ] **Step 4: Run tests to verify they pass**
@@ -1218,6 +1216,7 @@ git commit -m "feat(diff): add Terraform-style plan formatting"
 ### Task 6: Implement plan execution (executePlan)
 
 **Files:**
+
 - Modify: `src/diff.ts`
 - Modify: `test/diff.test.ts`
 
@@ -1232,8 +1231,12 @@ import type { DiffPlan, DiffOptions } from "../src/types.js";
 function mockClient() {
   return {
     apiVersion: "v3" as const,
-    createTable: vi.fn().mockResolvedValue({ id: "tbl_new", title: "orders", fields: [], views: [], raw: {} }),
-    getTable: vi.fn().mockResolvedValue({ id: "tbl_new", title: "orders", fields: [], views: [], raw: {} }),
+    createTable: vi
+      .fn()
+      .mockResolvedValue({ id: "tbl_new", title: "orders", fields: [], views: [], raw: {} }),
+    getTable: vi
+      .fn()
+      .mockResolvedValue({ id: "tbl_new", title: "orders", fields: [], views: [], raw: {} }),
     createField: vi.fn().mockResolvedValue({ id: "fld_new", title: "amount" }),
     updateField: vi.fn().mockResolvedValue({ id: "fld1", title: "name" }),
     deleteField: vi.fn().mockResolvedValue(undefined),
@@ -1256,11 +1259,21 @@ describe("executePlan", () => {
           title: "orders",
           blocked: false,
           fields: [
-            { kind: "field", action: "add", title: "amount", tableTitle: "orders", type: "Currency", blocked: false },
+            {
+              kind: "field",
+              action: "add",
+              title: "amount",
+              tableTitle: "orders",
+              type: "Currency",
+              blocked: false,
+            },
           ],
         },
       ],
-      summary: { tables: { add: 1, delete: 0 }, fields: { add: 1, modify: 0, delete: 0, blocked: 0 } },
+      summary: {
+        tables: { add: 1, delete: 0 },
+        fields: { add: 1, modify: 0, delete: 0, blocked: 0 },
+      },
     };
 
     const options: DiffOptions = {
@@ -1282,10 +1295,27 @@ describe("executePlan", () => {
     const client = mockClient();
     const plan: DiffPlan = {
       entries: [
-        { kind: "table", action: "delete", title: "old", blocked: true, reason: "requires --allow-drop-table" },
-        { kind: "field", action: "type_change", title: "status", tableTitle: "users", blocked: true, reason: "requires --force-type-change", changes: { type: { from: "A", to: "B" } } },
+        {
+          kind: "table",
+          action: "delete",
+          title: "old",
+          blocked: true,
+          reason: "requires --allow-drop-table",
+        },
+        {
+          kind: "field",
+          action: "type_change",
+          title: "status",
+          tableTitle: "users",
+          blocked: true,
+          reason: "requires --force-type-change",
+          changes: { type: { from: "A", to: "B" } },
+        },
       ],
-      summary: { tables: { add: 0, delete: 1 }, fields: { add: 0, modify: 0, delete: 0, blocked: 1 } },
+      summary: {
+        tables: { add: 0, delete: 1 },
+        fields: { add: 0, modify: 0, delete: 0, blocked: 1 },
+      },
     };
 
     const options: DiffOptions = {
@@ -1306,13 +1336,24 @@ describe("executePlan", () => {
 
   it("executes blocked entries when flags are set", async () => {
     const client = mockClient();
-    client.listTables.mockResolvedValue([{ id: "tbl1", title: "old", fields: [], views: [], raw: {} }]);
+    client.listTables.mockResolvedValue([
+      { id: "tbl1", title: "old", fields: [], views: [], raw: {} },
+    ]);
 
     const plan: DiffPlan = {
       entries: [
-        { kind: "table", action: "delete", title: "old", blocked: true, reason: "requires --allow-drop-table" },
+        {
+          kind: "table",
+          action: "delete",
+          title: "old",
+          blocked: true,
+          reason: "requires --allow-drop-table",
+        },
       ],
-      summary: { tables: { add: 0, delete: 1 }, fields: { add: 0, modify: 0, delete: 0, blocked: 0 } },
+      summary: {
+        tables: { add: 0, delete: 1 },
+        fields: { add: 0, modify: 0, delete: 0, blocked: 0 },
+      },
     };
 
     const options: DiffOptions = {
@@ -1336,7 +1377,16 @@ describe("executePlan", () => {
       {
         id: "tbl1",
         title: "users",
-        fields: [{ id: "fld_old", title: "old_col", type: "SingleLineText", primary: false, system: false, raw: {} }],
+        fields: [
+          {
+            id: "fld_old",
+            title: "old_col",
+            type: "SingleLineText",
+            primary: false,
+            system: false,
+            raw: {},
+          },
+        ],
         views: [],
         raw: {},
       },
@@ -1346,7 +1396,10 @@ describe("executePlan", () => {
       entries: [
         { kind: "field", action: "delete", title: "old_col", tableTitle: "users", blocked: false },
       ],
-      summary: { tables: { add: 0, delete: 0 }, fields: { add: 0, modify: 0, delete: 1, blocked: 0 } },
+      summary: {
+        tables: { add: 0, delete: 0 },
+        fields: { add: 0, modify: 0, delete: 1, blocked: 0 },
+      },
     };
 
     const options: DiffOptions = {
@@ -1412,12 +1465,13 @@ export async function executePlan(
     }
 
     try {
-      const fields = entry.fields?.map((f) => ({
-        title: f.title,
-        type: f.type,
-        options: {},
-        api: {},
-      })) ?? [];
+      const fields =
+        entry.fields?.map((f) => ({
+          title: f.title,
+          type: f.type,
+          options: {},
+          api: {},
+        })) ?? [];
 
       const tableSpec = { title: entry.title, fields, views: [], api: {} };
       const { simpleFields } = splitTableFields(tableSpec);
@@ -1446,7 +1500,9 @@ export async function executePlan(
     const table = tablesByTitle.get((entry.tableTitle ?? "").toLowerCase());
 
     if (!table?.id) {
-      result.errors.push(`Cannot add field "${entry.title}": table "${entry.tableTitle}" not found`);
+      result.errors.push(
+        `Cannot add field "${entry.title}": table "${entry.tableTitle}" not found`,
+      );
       continue;
     }
 
@@ -1457,15 +1513,25 @@ export async function executePlan(
         table.id,
         buildFieldCreatePayload(client.apiVersion, fieldSpec, {
           currentTableId: table.id,
-          resolveCurrentFieldReference: () => { throw new Error("not supported in diff"); },
-          resolveCurrentTableField: () => { throw new Error("not supported in diff"); },
-          resolveRelatedFieldReference: () => { throw new Error("not supported in diff"); },
-          resolveRelatedTable: () => { throw new Error("not supported in diff"); },
+          resolveCurrentFieldReference: () => {
+            throw new Error("not supported in diff");
+          },
+          resolveCurrentTableField: () => {
+            throw new Error("not supported in diff");
+          },
+          resolveRelatedFieldReference: () => {
+            throw new Error("not supported in diff");
+          },
+          resolveRelatedTable: () => {
+            throw new Error("not supported in diff");
+          },
         }),
       );
       result.executed += 1;
     } catch (err: any) {
-      result.errors.push(`Failed to add field "${entry.title}" on "${entry.tableTitle}": ${err.message}`);
+      result.errors.push(
+        `Failed to add field "${entry.title}" on "${entry.tableTitle}": ${err.message}`,
+      );
     }
   }
 
@@ -1487,14 +1553,18 @@ export async function executePlan(
     const table = tablesByTitle.get((entry.tableTitle ?? "").toLowerCase());
 
     if (!table?.id) {
-      result.errors.push(`Cannot modify field "${entry.title}": table "${entry.tableTitle}" not found`);
+      result.errors.push(
+        `Cannot modify field "${entry.title}": table "${entry.tableTitle}" not found`,
+      );
       continue;
     }
 
     const liveField = matchByTitle(table.fields, entry.title);
 
     if (!liveField?.id) {
-      result.errors.push(`Cannot modify field "${entry.title}": field not found on "${entry.tableTitle}"`);
+      result.errors.push(
+        `Cannot modify field "${entry.title}": field not found on "${entry.tableTitle}"`,
+      );
       continue;
     }
 
@@ -1518,7 +1588,9 @@ export async function executePlan(
       await client.updateField(options.baseId, table.id, liveField.id, payload);
       result.executed += 1;
     } catch (err: any) {
-      result.errors.push(`Failed to modify field "${entry.title}" on "${entry.tableTitle}": ${err.message}`);
+      result.errors.push(
+        `Failed to modify field "${entry.title}" on "${entry.tableTitle}": ${err.message}`,
+      );
     }
   }
 
@@ -1531,14 +1603,18 @@ export async function executePlan(
     const table = tablesByTitle.get((entry.tableTitle ?? "").toLowerCase());
 
     if (!table?.id) {
-      result.errors.push(`Cannot delete field "${entry.title}": table "${entry.tableTitle}" not found`);
+      result.errors.push(
+        `Cannot delete field "${entry.title}": table "${entry.tableTitle}" not found`,
+      );
       continue;
     }
 
     const liveField = matchByTitle(table.fields, entry.title);
 
     if (!liveField?.id) {
-      result.errors.push(`Cannot delete field "${entry.title}": field not found on "${entry.tableTitle}"`);
+      result.errors.push(
+        `Cannot delete field "${entry.title}": field not found on "${entry.tableTitle}"`,
+      );
       continue;
     }
 
@@ -1546,7 +1622,9 @@ export async function executePlan(
       await client.deleteField(options.baseId, table.id, liveField.id);
       result.executed += 1;
     } catch (err: any) {
-      result.errors.push(`Failed to delete field "${entry.title}" on "${entry.tableTitle}": ${err.message}`);
+      result.errors.push(
+        `Failed to delete field "${entry.title}" on "${entry.tableTitle}": ${err.message}`,
+      );
     }
   }
 
@@ -1597,6 +1675,7 @@ git commit -m "feat(diff): add plan execution with phased ordering and safety fl
 ### Task 7: Wire up CLI integration
 
 **Files:**
+
 - Modify: `src/cli.ts`
 - Modify: `src/diff.ts` (add `runDiffCommand` orchestrator)
 
@@ -1613,10 +1692,7 @@ import { createNocoClient } from "./nocodb-client.js";
 import { parseFlags } from "./args.js";
 import readline from "node:readline";
 
-async function fetchLiveState(
-  client: NocoClient,
-  baseId: string,
-): Promise<NormalizedTable[]> {
+async function fetchLiveState(client: NocoClient, baseId: string): Promise<NormalizedTable[]> {
   const tableSummaries = await client.listTables(baseId);
   const hydrated: NormalizedTable[] = [];
 
@@ -1690,7 +1766,9 @@ export async function runDiffCommand(
 
   // Execute if requested
   if (flags.execute) {
-    const confirmed = await promptConfirmation("\nDo you want to execute these changes? (yes/no): ");
+    const confirmed = await promptConfirmation(
+      "\nDo you want to execute these changes? (yes/no): ",
+    );
 
     if (!confirmed) {
       printOutput("Cancelled.");
@@ -1779,6 +1857,7 @@ git commit -m "feat(cli): wire up diff command with interactive confirmation"
 ### Task 8: Run full quality checks and fix any issues
 
 **Files:**
+
 - All modified/created files
 
 - [ ] **Step 1: Run the full check suite**
@@ -1791,6 +1870,7 @@ Expected: PASS on all checks
 - [ ] **Step 2: Fix any lint/format issues**
 
 If `format:check` fails, run:
+
 ```bash
 npm run format
 ```
