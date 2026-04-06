@@ -83,6 +83,7 @@ function createFieldContext(
   tableStatesByTitle: Map<string, TableState> | null,
 ) {
   return {
+    currentTableId: tableState.table.id,
     resolveCurrentTableField(
       _spec: FieldSpec | ViewSpec,
       ref: { fieldId?: string; fieldTitle?: string; fallbackToPrimary?: boolean },

@@ -49,33 +49,40 @@ export async function promptHidden(
   options: PromptOptions = {},
 ): Promise<string | null> {
   ensureInteractive();
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    terminal: true,
-  });
 
-  const mutableRl = rl as readline.Interface & {
-    stdoutMuted?: boolean;
-    _writeToOutput?: (text: string) => void;
-  };
-  mutableRl.stdoutMuted = false;
-  mutableRl._writeToOutput = (text: string) => {
-    if (mutableRl.stdoutMuted) {
-      process.stdout.write("*");
-      return;
-    }
+  process.stdout.write(`${label} (input hidden): `);
 
-    process.stdout.write(text);
-  };
+  const { stdin } = process;
+  const wasRaw = stdin.isRaw;
+  stdin.setRawMode(true);
+  stdin.resume();
+  stdin.setEncoding("utf8");
 
   try {
-    process.stdout.write(renderPrompt(label, undefined));
-    mutableRl.stdoutMuted = true;
-    const answer = (await rl.question("")).trim();
-    process.stdout.write("\n");
+    const answer = await new Promise<string>((resolve) => {
+      let buf = "";
+      const onData = (ch: string) => {
+        if (ch === "\r" || ch === "\n") {
+          stdin.removeListener("data", onData);
+          process.stdout.write("\n");
+          resolve(buf);
+        } else if (ch === "\u007F" || ch === "\b") {
+          if (buf.length > 0) {
+            buf = buf.slice(0, -1);
+          }
+        } else if (ch === "\u0003") {
+          stdin.removeListener("data", onData);
+          process.exit(130);
+        } else {
+          buf += ch;
+        }
+      };
+      stdin.on("data", onData);
+    });
 
-    if (!answer) {
+    const trimmed = answer.trim();
+
+    if (!trimmed) {
       if (options.defaultValue !== undefined) {
         return options.defaultValue;
       }
@@ -83,9 +90,10 @@ export async function promptHidden(
       return options.allowEmpty ? null : "";
     }
 
-    return answer;
+    return trimmed;
   } finally {
-    rl.close();
+    stdin.setRawMode(wasRaw);
+    stdin.pause();
   }
 }
 

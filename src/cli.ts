@@ -8,6 +8,7 @@ import {
 } from "./admin.js";
 import { runApply, formatApplySummary } from "./apply.js";
 import { loadResolvedConfig, requireConnectionConfig } from "./config.js";
+import { runExport } from "./export.js";
 import { CliError } from "./errors.js";
 import {
   countManifestResources,
@@ -29,6 +30,7 @@ Usage:
   noco-meta context <show|set|clear>
   noco-meta doctor
   noco-meta request <METHOD> <PATH> [--body @file.json] [--query key=value] [--header key=value]
+  noco-meta export [-o file.json] [--compact] [--table "T1,T2"] [--include-system]
   noco-meta apply <manifest.json>
   noco-meta plan <manifest.json>
   noco-meta validate <manifest.json>
@@ -61,6 +63,48 @@ function validatePathArg(positionals: string[], commandName: string): string {
   }
 
   return positionals[0];
+}
+
+async function runExportCommand(
+  globalConfig: Awaited<ReturnType<typeof loadResolvedConfig>>,
+  args: string[],
+): Promise<void> {
+  const { flags } = parseFlags(args, {
+    booleanFlags: ["compact", "include-system"],
+  });
+
+  if (!globalConfig.baseId) {
+    throw new CliError(
+      "export requires --base-id or a configured base context (via init / context set).",
+    );
+  }
+
+  const client = createNocoClient(globalConfig);
+  const tableFilter = flags.table
+    ? String(flags.table)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : null;
+
+  const manifest = await runExport(client, {
+    baseId: globalConfig.baseId,
+    workspaceId: globalConfig.workspaceId,
+    tables: tableFilter,
+    includeSystem: flags["include-system"] === true,
+  });
+
+  const json = flags.compact ? JSON.stringify(manifest) : JSON.stringify(manifest, null, 2);
+
+  const outputPath = flags.o ?? flags.output;
+
+  if (outputPath) {
+    const fs = await import("node:fs");
+    fs.writeFileSync(String(outputPath), `${json}\n`, "utf8");
+    printOutput(`Exported to ${outputPath}`);
+  } else {
+    process.stdout.write(`${json}\n`);
+  }
 }
 
 async function runRequest(
@@ -173,6 +217,13 @@ export async function runCli(argv: string[]): Promise<void> {
     case "doctor":
       await runDoctor(parsed.globals);
       return;
+
+    case "export": {
+      const globalConfig = await loadResolvedConfig(parsed.globals);
+      requireConnectionConfig(globalConfig);
+      await runExportCommand(globalConfig, parsed.commandArgs);
+      return;
+    }
 
     case "request": {
       const globalConfig = await loadResolvedConfig(parsed.globals);

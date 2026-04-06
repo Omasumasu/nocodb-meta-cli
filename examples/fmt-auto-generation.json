@@ -1,0 +1,393 @@
+{
+  "workspace": {
+    "title": "Default Workspace"
+  },
+  "base": {
+    "title": "FMT自動生成"
+  },
+  "tables": [
+    {
+      "title": "案内文",
+      "fields": [
+        {
+          "title": "案内文名",
+          "type": "SingleLineText",
+          "required": true
+        },
+        {
+          "title": "案内文タイトル",
+          "type": "LongText"
+        },
+        {
+          "title": "パターン",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "なしなし", "color": "#EBF1F4" },
+              { "title": "なしあり", "color": "#D4F7E0" },
+              { "title": "ありあり", "color": "#FFF0D1" }
+            ]
+          }
+        },
+        {
+          "title": "投函種別",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "管理替え" },
+              { "title": "N0" },
+              { "title": "HW切替" },
+              { "title": "いえらぶ切替" },
+              { "title": "物件付随_契約分離" }
+            ]
+          }
+        },
+        {
+          "title": "支払方法",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "クレカNG（銀振OK）" },
+              { "title": "口振のみ" }
+            ]
+          }
+        },
+        {
+          "title": "用紙サイズ",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [{ "title": "A3" }, { "title": "A4" }]
+          }
+        },
+        {
+          "title": "gdoc URL",
+          "type": "URL"
+        },
+        {
+          "title": "デザイン",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [{ "title": "新デザイン" }, { "title": "旧デザイン" }]
+          }
+        },
+        {
+          "title": "バージョン",
+          "type": "Number"
+        },
+        {
+          "title": "有効",
+          "type": "Checkbox"
+        }
+      ]
+    },
+    {
+      "title": "委任状",
+      "fields": [
+        {
+          "title": "案内文タイトル",
+          "type": "LongText",
+          "required": true
+        },
+        {
+          "title": "投函種別",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "管理替え" },
+              { "title": "N0" },
+              { "title": "HW切替" },
+              { "title": "いえらぶ切替" },
+              { "title": "物件付随_契約分離" }
+            ]
+          }
+        },
+        {
+          "title": "支払方法",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "クレカNG（銀振OK）" },
+              { "title": "口振のみ" }
+            ]
+          }
+        },
+        {
+          "title": "訂正印",
+          "type": "Checkbox"
+        },
+        {
+          "title": "gdoc URL",
+          "type": "URL"
+        },
+        {
+          "title": "バージョン",
+          "type": "Number"
+        },
+        {
+          "title": "有効",
+          "type": "Checkbox"
+        }
+      ]
+    },
+    {
+      "title": "封入物",
+      "fields": [
+        {
+          "title": "封入物名",
+          "type": "SingleLineText",
+          "required": true
+        },
+        {
+          "title": "種別",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "チラシ" },
+              { "title": "口振依頼書" },
+              { "title": "委任状記入例" },
+              { "title": "よくある質問" },
+              { "title": "その他" }
+            ]
+          }
+        },
+        {
+          "title": "PDF",
+          "type": "Attachment"
+        }
+      ]
+    },
+    {
+      "title": "利用規則",
+      "fields": [
+        {
+          "title": "gdoc URL",
+          "type": "URL"
+        },
+        {
+          "title": "バージョン",
+          "type": "Number"
+        },
+        {
+          "title": "有効",
+          "type": "Checkbox"
+        }
+      ]
+    },
+    {
+      "title": "契約条項",
+      "fields": [
+        {
+          "title": "識別子記号",
+          "type": "SingleLineText"
+        },
+        {
+          "title": "gdoc URL",
+          "type": "URL"
+        },
+        {
+          "title": "バージョン",
+          "type": "Number"
+        },
+        {
+          "title": "有効",
+          "type": "Checkbox"
+        }
+      ]
+    },
+    {
+      "title": "投函設定",
+      "fields": [
+        {
+          "title": "CLロゴ画像URL",
+          "type": "URL"
+        },
+        {
+          "title": "支払方法",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "クレカNG（銀振OK）" },
+              { "title": "口振のみ" }
+            ]
+          }
+        },
+        {
+          "title": "デフォルト契約条項",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "契約条項"
+          }
+        },
+        {
+          "title": "デフォルト利用規則",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "利用規則"
+          }
+        }
+      ]
+    },
+    {
+      "title": "投函",
+      "fields": [
+        {
+          "title": "投函種別",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "管理替え" },
+              { "title": "N0" },
+              { "title": "HW切替" },
+              { "title": "いえらぶ切替" },
+              { "title": "物件付随_契約分離" }
+            ]
+          }
+        },
+        {
+          "title": "メモ",
+          "type": "LongText"
+        },
+        {
+          "title": "封入物",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "mm",
+            "relatedTable": "封入物"
+          }
+        }
+      ]
+    },
+    {
+      "title": "投函グループ",
+      "fields": [
+        {
+          "title": "パターン",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "なしなし", "color": "#EBF1F4" },
+              { "title": "なしあり", "color": "#D4F7E0" },
+              { "title": "ありあり", "color": "#FFF0D1" }
+            ]
+          }
+        },
+        {
+          "title": "投函種別",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "管理替え" },
+              { "title": "N0" },
+              { "title": "HW切替" },
+              { "title": "いえらぶ切替" },
+              { "title": "物件付随_契約分離" }
+            ]
+          }
+        },
+        {
+          "title": "旧デザイン使用",
+          "type": "Checkbox"
+        },
+        {
+          "title": "生成結果URL",
+          "type": "URL"
+        },
+        {
+          "title": "再送版生成結果URL",
+          "type": "URL"
+        },
+        {
+          "title": "メモ",
+          "type": "LongText"
+        },
+        {
+          "title": "投函",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "投函"
+          }
+        },
+        {
+          "title": "使用案内文",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "案内文"
+          }
+        },
+        {
+          "title": "使用委任状",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "委任状"
+          }
+        },
+        {
+          "title": "使用契約条項",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "契約条項"
+          }
+        },
+        {
+          "title": "使用利用規則",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "利用規則"
+          }
+        }
+      ]
+    },
+    {
+      "title": "契約",
+      "fields": [
+        {
+          "title": "パターン",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "なしなし", "color": "#EBF1F4" },
+              { "title": "なしあり", "color": "#D4F7E0" },
+              { "title": "ありあり", "color": "#FFF0D1" }
+            ]
+          }
+        },
+        {
+          "title": "投函種別",
+          "type": "SingleSelect",
+          "options": {
+            "choices": [
+              { "title": "通常" },
+              { "title": "管理替え" },
+              { "title": "N0" },
+              { "title": "HW切替" },
+              { "title": "いえらぶ切替" },
+              { "title": "物件付随_契約分離" }
+            ]
+          }
+        },
+        {
+          "title": "投函グループ",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "投函グループ"
+          }
+        }
+      ]
+    }
+  ]
+}

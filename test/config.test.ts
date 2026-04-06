@@ -81,11 +81,20 @@ describe("config resolution", () => {
   });
 
   it("requires init when only CLI flags are provided locally", async () => {
-    const config = await loadResolvedConfig({
-      "base-url": "https://example.nocodb.test",
-      token: "secret-token",
-      "api-version": "v3",
-    });
+    const emptyHome = createTempDir();
+    const emptyCwd = createTempDir();
+
+    const config = await loadResolvedConfig(
+      {
+        "base-url": "https://example.nocodb.test",
+        token: "secret-token",
+        "api-version": "v3",
+      },
+      {
+        cwd: emptyCwd,
+        homeDir: emptyHome,
+      },
+    );
 
     expect(config.configSource).toBe("none");
     expect(() => requireConnectionConfig(config)).toThrow(/requires initialization/i);

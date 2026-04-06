@@ -20,6 +20,7 @@ const V2_VIEW_TYPE_IDS: Record<string, number> = {
 };
 
 type FieldContext = {
+  currentTableId?: string;
   resolveCurrentFieldReference: (
     spec: FieldSpec,
     ref: { fieldId?: string; fieldTitle?: string; fallbackToPrimary?: boolean },
@@ -128,22 +129,13 @@ function buildV2FieldPayload(field: FieldSpec, context: FieldContext): Record<st
   }
 
   if (field.type === "Links" || field.type === "LinkToAnotherRecord") {
-    const sourceField = context.resolveCurrentTableField(field, {
-      fieldId: field.options.sourceFieldId,
-      fieldTitle: field.options.sourceField,
-      fallbackToPrimary: true,
-    });
-    const relatedField = context.resolveRelatedFieldReference(field, {
-      fieldId: field.options.relatedFieldId,
-      fieldTitle: field.options.relatedField,
-      fallbackToPrimary: true,
-    });
+    const relatedTable = context.resolveRelatedTable(field);
+    const relType = mapRelationType(field.options.relationType);
 
-    payload.colOptions = {
-      type: mapRelationType(field.options.relationType),
-      fk_child_column_id: sourceField.id,
-      fk_parent_column_id: relatedField.id,
-    };
+    payload.parentId = context.currentTableId;
+    payload.childId = relatedTable.id;
+    payload.type = relType;
+    payload.uidt = "LinkToAnotherRecord";
   }
 
   return applyVersionOverride(field, payload, "v2");
@@ -278,6 +270,7 @@ export function buildBootstrapField(): FieldSpec {
 
 function nullContext(): FieldContext {
   return {
+    currentTableId: undefined,
     resolveCurrentFieldReference() {
       throw new CliError("Unexpected deferred field resolution during table create.");
     },

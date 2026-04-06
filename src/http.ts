@@ -59,6 +59,11 @@ export async function requestJson(
   const payload = text ? (isJson ? JSON.parse(text) : text) : null;
 
   if (!response.ok) {
+    if (config.verbose) {
+      process.stderr.write(`[debug] ${request.method} ${request.path} → ${response.status}\n`);
+      process.stderr.write(`[debug] request body: ${body ?? "(none)"}\n`);
+      process.stderr.write(`[debug] response: ${text}\n`);
+    }
     throw new CliError(`Request failed for ${request.method} ${request.path}`, {
       status: response.status,
       details: payload,

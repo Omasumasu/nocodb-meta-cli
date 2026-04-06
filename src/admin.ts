@@ -112,24 +112,19 @@ async function verifyConnection(config: CliConfig): Promise<{
 }> {
   const client = createNocoClient(config);
 
-  if (config.apiVersion === "v3") {
-    const workspaces = await client.listWorkspaces();
+  const workspaces = await client.listWorkspaces();
 
-    if (!config.workspaceId) {
-      return {
-        workspaces,
-        bases: [],
-      };
-    }
+  const workspaceId = config.workspaceId ?? workspaces[0]?.id ?? null;
 
-    const bases = await client.listBases(config.workspaceId);
-    return { workspaces, bases };
+  if (!workspaceId) {
+    return {
+      workspaces,
+      bases: [],
+    };
   }
 
-  return {
-    workspaces: [],
-    bases: await client.listBases(null),
-  };
+  const bases = await client.listBases(workspaceId);
+  return { workspaces, bases };
 }
 
 async function buildInteractiveConfig(flags: FlagMap): Promise<{
