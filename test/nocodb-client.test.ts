@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createNocoClient, resolveRequestPath } from "../src/nocodb-client.js";
 import type { CliConfig } from "../src/types.js";
@@ -16,6 +16,16 @@ function makeConfig(apiVersion: "v2" | "v3"): CliConfig {
     token: "test-token",
     apiVersion,
     configSource: "managed",
+    workspaceId: null,
+    baseId: null,
+    profileName: null,
+    configHome: null,
+    projectContextPath: null,
+    managed: false,
+    secretStoreKind: null,
+    json: false,
+    verbose: false,
+    configPath: null,
   };
 }
 
@@ -30,11 +40,11 @@ function mockFetch(responseBody: unknown, status = 200) {
   return handler;
 }
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
-
 describe("updateField", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("sends PATCH to v2 columns endpoint", async () => {
     const handler = mockFetch({ id: "fld1", title: "Name", uidt: "SingleLineText" });
     const client = createNocoClient(makeConfig("v2"));
@@ -64,6 +74,10 @@ describe("updateField", () => {
 });
 
 describe("deleteField", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("sends DELETE to v2 columns endpoint", async () => {
     const handler = mockFetch(null);
     const client = createNocoClient(makeConfig("v2"));
@@ -90,6 +104,10 @@ describe("deleteField", () => {
 });
 
 describe("deleteTable", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("sends DELETE to v2 tables endpoint", async () => {
     const handler = mockFetch(null);
     const client = createNocoClient(makeConfig("v2"));
