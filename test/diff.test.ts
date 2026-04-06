@@ -7,6 +7,7 @@ import {
   formatDiffPlan,
   executePlan,
 } from "../src/diff.js";
+import type { ExecutionResult } from "../src/diff.js";
 import type {
   DiffOptions,
   DiffPlan,
@@ -383,7 +384,10 @@ describe("formatDiffPlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 1, delete: 0 }, fields: { add: 1, modify: 0, delete: 0, blocked: 0 } },
+      summary: {
+        tables: { add: 1, delete: 0 },
+        fields: { add: 1, modify: 0, delete: 0, blocked: 0 },
+      },
     };
 
     const output = formatDiffPlan(plan, "MyBase");
@@ -404,7 +408,10 @@ describe("formatDiffPlan", () => {
           reason: "requires --allow-drop-table",
         },
       ],
-      summary: { tables: { add: 0, delete: 1 }, fields: { add: 0, modify: 0, delete: 0, blocked: 0 } },
+      summary: {
+        tables: { add: 0, delete: 1 },
+        fields: { add: 0, modify: 0, delete: 0, blocked: 0 },
+      },
     };
 
     const output = formatDiffPlan(plan, "MyBase");
@@ -437,7 +444,10 @@ describe("formatDiffPlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 0, delete: 0 }, fields: { add: 0, modify: 0, delete: 0, blocked: 1 } },
+      summary: {
+        tables: { add: 0, delete: 0 },
+        fields: { add: 0, modify: 0, delete: 0, blocked: 1 },
+      },
     };
 
     const output = formatDiffPlan(plan, "MyBase");
@@ -468,7 +478,10 @@ describe("formatDiffPlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 0, delete: 0 }, fields: { add: 0, modify: 1, delete: 0, blocked: 0 } },
+      summary: {
+        tables: { add: 0, delete: 0 },
+        fields: { add: 0, modify: 1, delete: 0, blocked: 0 },
+      },
     };
 
     const output = formatDiffPlan(plan, "MyBase");
@@ -479,9 +492,7 @@ describe("formatDiffPlan", () => {
 
   it("includes summary line", () => {
     const plan: DiffPlan = {
-      entries: [
-        { kind: "table", action: "add", title: "T1", blocked: false, fields: [] },
-      ],
+      entries: [{ kind: "table", action: "add", title: "T1", blocked: false, fields: [] }],
       summary: {
         tables: { add: 1, delete: 0 },
         fields: { add: 0, modify: 0, delete: 0, blocked: 0 },
@@ -516,9 +527,7 @@ describe("executePlan", () => {
         makeTable({
           id: "tbl_new",
           title: "Projects",
-          fields: [
-            makeField({ id: "fld_new1", title: "Name", type: "SingleLineText" }),
-          ],
+          fields: [makeField({ id: "fld_new1", title: "Name", type: "SingleLineText" })],
         }),
       ),
       createTable: vi.fn().mockResolvedValue(makeTable({ id: "tbl_new", title: "Projects" })),
@@ -558,10 +567,13 @@ describe("executePlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 1, delete: 0 }, fields: { add: 1, modify: 0, delete: 0, blocked: 0 } },
+      summary: {
+        tables: { add: 1, delete: 0 },
+        fields: { add: 1, modify: 0, delete: 0, blocked: 0 },
+      },
     };
 
-    const result = await executePlan(client, plan, baseOptions);
+    const result: ExecutionResult = await executePlan(client, plan, baseOptions);
 
     expect(client.createTable).toHaveBeenCalledTimes(1);
     expect(client.getTable).toHaveBeenCalledTimes(1);
@@ -598,7 +610,10 @@ describe("executePlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 0, delete: 1 }, fields: { add: 0, modify: 0, delete: 0, blocked: 1 } },
+      summary: {
+        tables: { add: 0, delete: 1 },
+        fields: { add: 0, modify: 0, delete: 0, blocked: 1 },
+      },
     };
 
     const result = await executePlan(client, plan, baseOptions);
@@ -639,7 +654,10 @@ describe("executePlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 0, delete: 1 }, fields: { add: 0, modify: 0, delete: 0, blocked: 1 } },
+      summary: {
+        tables: { add: 0, delete: 1 },
+        fields: { add: 0, modify: 0, delete: 0, blocked: 1 },
+      },
     };
 
     const result = await executePlan(client, plan, {
@@ -675,7 +693,10 @@ describe("executePlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 0, delete: 0 }, fields: { add: 0, modify: 0, delete: 1, blocked: 0 } },
+      summary: {
+        tables: { add: 0, delete: 0 },
+        fields: { add: 0, modify: 0, delete: 1, blocked: 0 },
+      },
     };
 
     const result = await executePlan(client, plan, baseOptions);
@@ -707,7 +728,10 @@ describe("executePlan", () => {
           ],
         },
       ],
-      summary: { tables: { add: 0, delete: 0 }, fields: { add: 0, modify: 0, delete: 1, blocked: 0 } },
+      summary: {
+        tables: { add: 0, delete: 0 },
+        fields: { add: 0, modify: 0, delete: 1, blocked: 0 },
+      },
     };
 
     const result = await executePlan(client, plan, baseOptions);

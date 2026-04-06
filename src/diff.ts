@@ -307,10 +307,7 @@ export function buildDiffPlan(
   return { entries, summary };
 }
 
-function countFieldEntry(
-  fe: DiffEntry,
-  summary: DiffPlan["summary"],
-): void {
+function countFieldEntry(fe: DiffEntry, summary: DiffPlan["summary"]): void {
   if (fe.action === "add") {
     summary.fields.add++;
   } else if (fe.action === "modify") {
@@ -549,12 +546,16 @@ export async function executePlan(
         api: {},
       });
 
-      const payload = buildTableCreatePayload(client.apiVersion, {
-        title: entry.title,
-        fields,
-        views: [],
-        api: {},
-      }, simpleFields);
+      const payload = buildTableCreatePayload(
+        client.apiVersion,
+        {
+          title: entry.title,
+          fields,
+          views: [],
+          api: {},
+        },
+        simpleFields,
+      );
 
       const created = await client.createTable(options.baseId, payload);
 
@@ -577,9 +578,7 @@ export async function executePlan(
       const liveTable = tablesByTitle.get(tableTitle.toLowerCase());
 
       if (!liveTable?.id) {
-        result.errors.push(
-          `Cannot add field "${entry.title}": table "${tableTitle}" not found.`,
-        );
+        result.errors.push(`Cannot add field "${entry.title}": table "${tableTitle}" not found.`);
         continue;
       }
 
