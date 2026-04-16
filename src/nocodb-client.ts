@@ -141,6 +141,9 @@ export function createNocoClient(config: CliConfig) {
     request,
 
     async listWorkspaces(): Promise<NormalizedWorkspace[]> {
+      if (apiVersion === "v2") {
+        return [];
+      }
       return normalizeCollection(await request("GET", "/meta/workspaces")).map(normalizeWorkspace);
     },
 

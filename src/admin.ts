@@ -112,6 +112,11 @@ async function verifyConnection(config: CliConfig): Promise<{
 }> {
   const client = createNocoClient(config);
 
+  if (config.apiVersion === "v2") {
+    const bases = await client.listBases(null);
+    return { workspaces: [], bases };
+  }
+
   const workspaces = await client.listWorkspaces();
 
   const workspaceId = config.workspaceId ?? workspaces[0]?.id ?? null;

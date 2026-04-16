@@ -132,8 +132,13 @@ function buildV2FieldPayload(field: FieldSpec, context: FieldContext): Record<st
     const relatedTable = context.resolveRelatedTable(field);
     const relType = mapRelationType(field.options.relationType);
 
-    payload.parentId = context.currentTableId;
-    payload.childId = relatedTable.id;
+    if (relType === "bt") {
+      payload.parentId = relatedTable.id;
+      payload.childId = context.currentTableId;
+    } else {
+      payload.parentId = context.currentTableId;
+      payload.childId = relatedTable.id;
+    }
     payload.type = relType;
     payload.uidt = "LinkToAnotherRecord";
   }
@@ -292,12 +297,24 @@ export function buildTableCreatePayload(
   fields: FieldSpec[],
 ): Record<string, unknown> {
   if (apiVersion === "v2") {
+    const idColumn = {
+      title: "Id",
+      column_name: "id",
+      uidt: "ID",
+      dt: "int4",
+      pk: true,
+      ai: true,
+      rqd: true,
+    };
     return applyVersionOverride(
       table,
       {
         title: table.title,
         description: table.description,
-        columns: fields.map((field) => buildV2FieldPayload(field, nullContext())),
+        columns: [
+          idColumn,
+          ...fields.map((field) => buildV2FieldPayload(field, nullContext())),
+        ],
       },
       "v2",
     );
