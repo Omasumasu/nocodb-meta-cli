@@ -1,0 +1,4 @@
+interface:
+  display_name: "NocoDB Meta Builder"
+  short_description: "Operate the noco-meta CLI to build NocoDB schema from manifests"
+  default_prompt: "Use the noco-meta CLI in this workspace to plan and apply NocoDB meta API changes from JSON manifests."

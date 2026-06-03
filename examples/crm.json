@@ -1,0 +1,62 @@
+{
+  "workspace": {
+    "title": "AI Schema Playground"
+  },
+  "base": {
+    "title": "CRM",
+    "meta": {
+      "icon_color": "#36BFFF"
+    }
+  },
+  "tables": [
+    {
+      "title": "Companies",
+      "fields": [
+        {
+          "title": "Name",
+          "type": "SingleLineText",
+          "required": true
+        },
+        {
+          "title": "Domain",
+          "type": "URL"
+        }
+      ],
+      "views": [
+        {
+          "title": "All Companies",
+          "type": "grid"
+        }
+      ]
+    },
+    {
+      "title": "Contacts",
+      "fields": [
+        {
+          "title": "Full Name",
+          "type": "SingleLineText",
+          "required": true
+        },
+        {
+          "title": "Email",
+          "type": "Email",
+          "unique": true
+        },
+        {
+          "title": "Company",
+          "type": "LinkToAnotherRecord",
+          "options": {
+            "relationType": "hm",
+            "relatedTable": "Companies"
+          }
+        }
+      ],
+      "views": [
+        {
+          "title": "All Contacts",
+          "type": "grid"
+        }
+      ]
+    }
+  ]
+}
